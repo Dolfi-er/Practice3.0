@@ -1,115 +1,69 @@
+// app/Http/Controllers/DashboardController.php (обновлённый)
 <?php
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Support\JwstHelper;
+use App\ViewModels\DashboardViewModel;
+use App\Services\JwstService;
 
 class DashboardController extends Controller
 {
-    private function base(): string { return getenv('RUST_BASE') ?: 'http://rust_iss:3000'; }
-
-    private function getJson(string $url, array $qs = []): array {
-        if ($qs) $url .= (str_contains($url,'?')?'&':'?') . http_build_query($qs);
-        $raw = @file_get_contents($url);
-        return $raw ? (json_decode($raw, true) ?: []) : [];
+    private DashboardViewModel $viewModel;
+    private JwstService $jwstService;
+    
+    public function __construct(DashboardViewModel $viewModel, JwstService $jwstService)
+    {
+        $this->viewModel = $viewModel;
+        $this->jwstService = $jwstService;
     }
-
+    
     public function index()
     {
-        // минимум: карта МКС и пустые контейнеры, JWST-галерея подтянется через /api/jwst/feed
-        $b     = $this->base();
-        $iss   = $this->getJson($b.'/last');
-        $trend = []; // фронт сам заберёт /api/iss/trend (через nginx прокси)
-
         return view('dashboard', [
-            'iss' => $iss,
-            'trend' => $trend,
-            'jw_gallery' => [], // не нужно сервером
-            'jw_observation_raw' => [],
-            'jw_observation_summary' => [],
-            'jw_observation_images' => [],
-            'jw_observation_files' => [],
+            'dashboard' => $this->viewModel->getDashboardData(),
             'metrics' => [
-                'iss_speed' => $iss['payload']['velocity'] ?? null,
-                'iss_alt'   => $iss['payload']['altitude'] ?? null,
+                'iss_speed' => null,
+                'iss_alt' => null,
                 'neo_total' => 0,
             ],
         ]);
     }
-
+    
     /**
      * /api/jwst/feed — серверный прокси/нормализатор JWST картинок.
-     * QS:
-     *  - source: jpg|suffix|program (default jpg)
-     *  - suffix: напр. _cal, _thumb, _crf
-     *  - program: ID программы (число)
-     *  - instrument: NIRCam|MIRI|NIRISS|NIRSpec|FGS
-     *  - page, perPage
      */
-    public function jwstFeed(Request $r)
+    public function jwstFeed(Request $request)
     {
-        $src   = $r->query('source', 'jpg');
-        $sfx   = trim((string)$r->query('suffix', ''));
-        $prog  = trim((string)$r->query('program', ''));
-        $instF = strtoupper(trim((string)$r->query('instrument', '')));
-        $page  = max(1, (int)$r->query('page', 1));
-        $per   = max(1, min(60, (int)$r->query('perPage', 24)));
-
-        $jw = new JwstHelper();
-
-        // выбираем эндпоинт
-        $path = 'all/type/jpg';
-        if ($src === 'suffix' && $sfx !== '') $path = 'all/suffix/'.ltrim($sfx,'/');
-        if ($src === 'program' && $prog !== '') $path = 'program/id/'.rawurlencode($prog);
-
-        $resp = $jw->get($path, ['page'=>$page, 'perPage'=>$per]);
-        $list = $resp['body'] ?? ($resp['data'] ?? (is_array($resp) ? $resp : []));
-
-        $items = [];
-        foreach ($list as $it) {
-            if (!is_array($it)) continue;
-
-            // выбираем валидную картинку
-            $url = null;
-            $loc = $it['location'] ?? $it['url'] ?? null;
-            $thumb = $it['thumbnail'] ?? null;
-            foreach ([$loc, $thumb] as $u) {
-                if (is_string($u) && preg_match('~\.(jpg|jpeg|png)(\?.*)?$~i', $u)) { $url = $u; break; }
-            }
-            if (!$url) {
-                $url = \App\Support\JwstHelper::pickImageUrl($it);
-            }
-            if (!$url) continue;
-
-            // фильтр по инструменту
-            $instList = [];
-            foreach (($it['details']['instruments'] ?? []) as $I) {
-                if (is_array($I) && !empty($I['instrument'])) $instList[] = strtoupper($I['instrument']);
-            }
-            if ($instF && $instList && !in_array($instF, $instList, true)) continue;
-
-            $items[] = [
-                'url'      => $url,
-                'obs'      => (string)($it['observation_id'] ?? $it['observationId'] ?? ''),
-                'program'  => (string)($it['program'] ?? ''),
-                'suffix'   => (string)($it['details']['suffix'] ?? $it['suffix'] ?? ''),
-                'inst'     => $instList,
-                'caption'  => trim(
-                    (($it['observation_id'] ?? '') ?: ($it['id'] ?? '')) .
-                    ' · P' . ($it['program'] ?? '-') .
-                    (($it['details']['suffix'] ?? '') ? ' · ' . $it['details']['suffix'] : '') .
-                    ($instList ? ' · ' . implode('/', $instList) : '')
-                ),
-                'link'     => $loc ?: $url,
+        try {
+            $filters = [
+                'source' => $request->query('source', 'jpg'),
+                'suffix' => $request->query('suffix', ''),
+                'program' => $request->query('program', ''),
+                'instrument' => strtoupper($request->query('instrument', '')),
+                'page' => max(1, (int)$request->query('page', 1)),
+                'perPage' => max(1, min(60, (int)$request->query('perPage', 24))),
             ];
-            if (count($items) >= $per) break;
+            
+            $result = $this->jwstService->getImages($filters);
+            
+            return response()->json([
+                'ok' => true,
+                'data' => [
+                    'source' => $result['source'] ?? '',
+                    'count' => $result['count'] ?? 0,
+                    'items' => $result['items'] ?? [],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'error' => [
+                    'code' => 'JWST_FETCH_ERROR',
+                    'message' => 'Ошибка получения данных JWST',
+                    'trace_id' => \Str::uuid(),
+                ],
+            ], 200);
         }
-
-        return response()->json([
-            'source' => $path,
-            'count'  => count($items),
-            'items'  => $items,
-        ]);
     }
 }
