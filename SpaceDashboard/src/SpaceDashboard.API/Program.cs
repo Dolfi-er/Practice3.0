@@ -1,41 +1,53 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Добавляем сервисы
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// База данных
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Внешние HTTP клиенты с политиками retry
+builder.Services.AddHttpClient("NasaClient", client =>
+{
+    client.BaseAddress = new Uri("https://api.nasa.gov/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+}).AddPolicyHandler(GetRetryPolicy());
+
+builder.Services.AddHttpClient("JWSTClient", client =>
+{
+    client.BaseAddress = new Uri("https://api.jwstapi.com/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("x-api-key", 
+        builder.Configuration["JWST:ApiKey"]);
+});
+
+// Кэширование Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "SpaceDashboard_";
+});
+
+// Регистрация сервисов
+builder.Services.AddScoped<IIssService, IssService>();
+builder.Services.AddScoped<IOsdrService, OsdrService>();
+builder.Services.AddScoped<IJwstService, JwstService>();
+builder.Services.AddScoped<ICmsService, CmsService>();
+builder.Services.AddScoped<IAstroService, AstroService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
