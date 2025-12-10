@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A6289388-9F45-42C1-AF3C-1CA3A2F45684}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceDashboard.API", "src\SpaceDashboard.API\SpaceDashboard.API.csproj", "{C2D9DC38-EA8A-452A-99F1-FAEB8A5D84F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceDashboard.Core", "src\SpaceDashboard.Core\SpaceDashboard.Core.csproj", "{48B8AB3A-D3BD-4DB1-B68E-D12ED6DC85A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceDashboard.Infrastructure", "src\SpaceDashboard.Infrastructure\SpaceDashboard.Infrastructure.csproj", "{9C4C3251-0FF3-4F95-86F1-E1F1DCBADC9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceDashboard.Services", "src\SpaceDashboard.Services\SpaceDashboard.Services.csproj", "{BEA0D892-DD5A-4CB6-A014-2CE56D1F28CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceDashboard.Workers", "src\SpaceDashboard.Workers\SpaceDashboard.Workers.csproj", "{1EB0871E-936C-4FA5-A529-5CD8397A69BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceDashboard.LegacyWorker", "src\SpaceDashboard.LegacyWorker\SpaceDashboard.LegacyWorker.csproj", "{0D7F6080-2132-4BFD-A6D4-A4A514735950}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C2D9DC38-EA8A-452A-99F1-FAEB8A5D84F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D9DC38-EA8A-452A-99F1-FAEB8A5D84F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D9DC38-EA8A-452A-99F1-FAEB8A5D84F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D9DC38-EA8A-452A-99F1-FAEB8A5D84F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48B8AB3A-D3BD-4DB1-B68E-D12ED6DC85A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48B8AB3A-D3BD-4DB1-B68E-D12ED6DC85A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48B8AB3A-D3BD-4DB1-B68E-D12ED6DC85A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48B8AB3A-D3BD-4DB1-B68E-D12ED6DC85A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C4C3251-0FF3-4F95-86F1-E1F1DCBADC9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C4C3251-0FF3-4F95-86F1-E1F1DCBADC9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C4C3251-0FF3-4F95-86F1-E1F1DCBADC9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C4C3251-0FF3-4F95-86F1-E1F1DCBADC9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEA0D892-DD5A-4CB6-A014-2CE56D1F28CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEA0D892-DD5A-4CB6-A014-2CE56D1F28CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEA0D892-DD5A-4CB6-A014-2CE56D1F28CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEA0D892-DD5A-4CB6-A014-2CE56D1F28CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EB0871E-936C-4FA5-A529-5CD8397A69BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EB0871E-936C-4FA5-A529-5CD8397A69BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EB0871E-936C-4FA5-A529-5CD8397A69BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EB0871E-936C-4FA5-A529-5CD8397A69BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D7F6080-2132-4BFD-A6D4-A4A514735950}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D7F6080-2132-4BFD-A6D4-A4A514735950}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D7F6080-2132-4BFD-A6D4-A4A514735950}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D7F6080-2132-4BFD-A6D4-A4A514735950}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C2D9DC38-EA8A-452A-99F1-FAEB8A5D84F9} = {A6289388-9F45-42C1-AF3C-1CA3A2F45684}
+		{48B8AB3A-D3BD-4DB1-B68E-D12ED6DC85A0} = {A6289388-9F45-42C1-AF3C-1CA3A2F45684}
+		{9C4C3251-0FF3-4F95-86F1-E1F1DCBADC9E} = {A6289388-9F45-42C1-AF3C-1CA3A2F45684}
+		{BEA0D892-DD5A-4CB6-A014-2CE56D1F28CD} = {A6289388-9F45-42C1-AF3C-1CA3A2F45684}
+		{1EB0871E-936C-4FA5-A529-5CD8397A69BB} = {A6289388-9F45-42C1-AF3C-1CA3A2F45684}
+		{0D7F6080-2132-4BFD-A6D4-A4A514735950} = {A6289388-9F45-42C1-AF3C-1CA3A2F45684}
+	EndGlobalSection
+EndGlobal
